@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Presença – Equipe Amarelo · SIPAT 2026</title>
+<meta name="theme-color" content="#ffc20e">
+<link rel="icon" href="logo.png">
+<link rel="stylesheet" href="estilo.css">
+<style>
+  body { min-height: 100vh; }
+  .topo {
+    background: radial-gradient(120% 90% at 50% 0%, #ffd84d 0%, var(--amarelo) 55%, var(--amarelo-forte) 100%);
+    text-align: center; padding: 22px 18px 26px;
+  }
+  .topo img { width: 132px; height: 132px; border-radius: 50%; box-shadow: 0 8px 22px rgba(90,60,0,.25); background: #fff; }
+  .topo h1 { margin: 12px 0 4px; font-size: 26px; line-height: 1.05; }
+  .topo p { margin: 0 auto; max-width: 340px; font-weight: 600; font-size: 14px; }
+  main { max-width: 560px; margin: 0 auto; padding: 18px 16px 90px; }
+
+  .contador { background: var(--branco); border-radius: var(--raio); box-shadow: var(--sombra); padding: 14px 16px; margin-top: -34px; position: relative; }
+  .contador .linha1 { display: flex; justify-content: space-between; align-items: baseline; font-weight: 800; }
+  .contador .num { font-size: 28px; font-style: italic; font-weight: 900; }
+  .barra { height: 12px; border-radius: 99px; background: #f3ead2; overflow: hidden; margin-top: 8px; }
+  .barra > i { display: block; height: 100%; width: 0; transition: width .6s;
+    background: repeating-linear-gradient(-45deg, var(--preto) 0 8px, #333 8px 16px); }
+
+  .resumo { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--cinza); }
+  .resumo b { color: var(--preto); font-size: 15px; font-style: italic; font-weight: 900; }
+  .tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; border-radius: 99px; padding: 3px 8px; white-space: nowrap; }
+  .tag.grupo { background: var(--verde-claro); color: #145c2e; }
+  .tag.corre { background: var(--amarelo); color: var(--preto); }
+  .tag.nao { background: #f1ebdc; color: var(--cinza); }
+  .pessoa .st { flex-direction: column; align-items: flex-end; gap: 4px; }
+  .eu { display: none; margin-top: 14px; background: var(--verde-claro); border: 2px solid #bfe6cc; color: #145c2e;
+        border-radius: var(--raio); padding: 12px 14px; font-weight: 700; align-items: center; gap: 10px; }
+  .eu.on { display: flex; }
+
+  .busca-box { position: sticky; top: 0; z-index: 5; background: var(--creme); padding: 14px 0 10px; }
+  .busca-box .campo { font-size: 17px; padding: 15px 16px 15px 46px;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' fill='none' stroke='%231b1b1b' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='8.5' cy='8.5' r='6'/%3E%3Cpath d='m13 13 5 5'/%3E%3C/svg%3E") no-repeat 16px center; }
+
+  .lista { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .pessoa { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: var(--branco);
+            border: 2px solid transparent; border-radius: 12px; padding: 12px 14px; box-shadow: 0 1px 0 rgba(0,0,0,.05); }
+  .pessoa:hover { border-color: var(--amarelo); }
+  .pessoa .av { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none;
+                background: var(--amarelo); font-weight: 900; font-style: italic; }
+  .pessoa .txt { flex: 1; min-width: 0; }
+  .pessoa .nome { font-weight: 800; }
+  .pessoa .cargo { font-size: 12px; color: var(--cinza); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pessoa.ok { background: #f7fcf8; }
+  .pessoa.ok .av { background: var(--verde-claro); }
+  .pessoa .st { font-size: 12px; font-weight: 800; color: var(--verde); display: flex; align-items: center; gap: 6px; }
+  .pessoa .st.pend { color: var(--cinza); }
+  .vazio { text-align: center; color: var(--cinza); padding: 26px 10px; font-weight: 600; }
+
+  .rodape { text-align: center; color: var(--cinza); font-size: 13px; font-weight: 600; margin-top: 18px; }
+
+  .fundo { position: fixed; inset: 0; background: rgba(20,16,5,.55); display: none; align-items: flex-end; justify-content: center; z-index: 50; }
+  .fundo.on { display: flex; }
+  .folha { background: var(--branco); width: 100%; max-width: 560px; border-radius: 22px 22px 0 0; overflow: hidden;
+           animation: sobe .22s ease-out; padding-bottom: env(safe-area-inset-bottom); }
+  @keyframes sobe { from { transform: translateY(40px); opacity: 0; } }
+  .folha .corpo { padding: 20px 20px 22px; }
+  .folha h2 { margin: 6px 0 2px; font-size: 22px; }
+  .folha .cargo { color: var(--cinza); font-weight: 600; font-size: 14px; }
+  .pergunta { margin: 18px 0 8px; font-weight: 800; }
+  .opcoes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .opcao { border: 2px solid var(--linha); background: #fff; border-radius: 12px; padding: 12px; font-weight: 800; }
+  .opcao.sel { border-color: var(--preto); background: var(--amarelo); }
+  .acoes { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-top: 18px; }
+  .acoes .btn { padding: 15px; font-size: 16px; }
+
+  .sucesso { text-align: center; padding: 30px 22px 26px; }
+  .sucesso .grande { width: 78px; height: 78px; border-radius: 50%; background: var(--verde); color: #fff; font-size: 42px;
+                     display: grid; place-items: center; margin: 0 auto 12px; animation: pop .35s ease-out; }
+  @keyframes pop { from { transform: scale(.4); } 70% { transform: scale(1.12); } }
+  .sucesso h2 { margin: 0 0 6px; }
+  .sucesso .lema { margin: 16px 0 18px; font-weight: 800; font-style: italic; background: var(--amarelo-claro); padding: 12px; border-radius: 12px; }
+</style>
+</head>
+<body>
+<div id="demo" class="aviso-demo" hidden>MODO DEMONSTRAÇÃO – as confirmações ficam só neste navegador</div>
+<header class="topo">
+  <img src="logo.png" alt="SIPAT 2026 – Equipe Amarelo">
+  <h1 class="titulo-ital">Lista de presença</h1>
+  <p>Procure seu nome e toque nele para confirmar que você está no grupo da Equipe Amarelo e se vai correr.</p>
+</header>
+<div class="faixa"></div>
+
+<main>
+  <div class="contador">
+    <div class="linha1"><span><span class="num" id="nConf">0</span> de <span id="nTotal">0</span> estão no grupo</span><span id="pct">0%</span></div>
+    <div class="barra"><i id="barra"></i></div>
+    <div class="resumo"><span><b id="nCorre">0</b> vão correr</span><span><b id="nNaoCorre">0</b> no grupo, não vão correr</span><span><b id="nFalta">0</b> faltam confirmar</span></div>
+  </div>
+  <div class="eu" id="eu"><span class="check-verde">✓</span><span id="euTxt"></span></div>
+
+  <div class="busca-box">
+    <input id="q" class="campo" type="search" placeholder="Digite seu nome" autocomplete="off" aria-label="Buscar nome">
+  </div>
+  <div class="lista" id="lista"><div class="vazio">Carregando a lista…</div></div>
+  <p class="rodape">Não achou seu nome? Fale com a líder da Equipe Amarelo.</p>
+</main>
+
+<div class="fundo" id="fundo">
+  <div class="folha" id="folha"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="pessoas-demo.js"></script>
+<script src="comum.js"></script>
+<script>
+let pessoas = [];
+let escolhido = null, corrida = null;
+const MEU = "sipat_amarelo_eu";
+
+function meuId() { try { return Number(localStorage.getItem(MEU)) || null; } catch (e) { return null; } }
+
+function render() {
+  const conf = pessoas.filter(p => p.presente).length;
+  const corre = pessoas.filter(p => p.presente && p.inscrito_corrida).length;
+  nCorre.textContent = corre; nNaoCorre.textContent = conf - corre; nFalta.textContent = pessoas.length - conf;
+  nConf.textContent = conf; nTotal.textContent = pessoas.length;
+  const pc = pessoas.length ? Math.round(conf / pessoas.length * 100) : 0;
+  pct.textContent = pc + "%"; barra.style.width = pc + "%";
+
+  const eu = pessoas.find(p => p.id === meuId());
+  document.getElementById("eu").classList.toggle("on", !!eu);
+  if (eu) euTxt.textContent = `Presença confirmada como ${eu.nome}.`;
+
+  const termo = q.value;
+  const res = busca(pessoas, termo);
+  if (!res.length) { lista.innerHTML = `<div class="vazio">Nenhum nome encontrado para “${esc(termo)}”.</div>`; return; }
+  lista.innerHTML = res.map(p => `
+    <button class="pessoa ${p.presente ? "ok" : ""}" data-id="${p.id}">
+      <span class="av">${esc(p.nome[0])}</span>
+      <span class="txt"><div class="nome">${esc(p.nome)}</div><div class="cargo">${esc(p.cargo)}</div></span>
+      ${p.presente ? `<span class="st"><span class="tag grupo">✓ No grupo</span>${p.inscrito_corrida ? '<span class="tag corre">Vai correr</span>' : '<span class="tag nao">Não vai correr</span>'}</span>` : '<span class="st pend">Confirmar</span>'}
+    </button>`).join("");
+}
+
+function abrir(p) {
+  escolhido = p; corrida = null;
+  if (p.presente) {
+    folha.innerHTML = `<div class="faixa"></div><div class="sucesso">
+      <div class="grande">✓</div><h2>${esc(p.nome)}</h2>
+      <div class="cargo">Esta presença já está confirmada.</div>
+      <button class="btn" style="margin-top:18px;width:100%" onclick="fechar()">Fechar</button></div>`;
+  } else {
+    folha.innerHTML = `<div class="faixa"></div><div class="corpo">
+      <span class="etiqueta">É você?</span>
+      <h2>${esc(p.nome)}</h2><div class="cargo">${esc(p.cargo)}</div>
+      <div class="pergunta">Você está participando da corrida da SIPAT?</div>
+      <div class="opcoes">
+        <button class="opcao" data-c="1">Sim, vou correr</button>
+        <button class="opcao" data-c="0">Não vou correr</button>
+      </div>
+      <div class="acoes">
+        <button class="btn claro" onclick="fechar()">Voltar</button>
+        <button class="btn verde" id="ok" disabled>Confirmar presença</button>
+      </div></div>`;
+    folha.querySelectorAll(".opcao").forEach(b => b.onclick = () => {
+      corrida = b.dataset.c === "1";
+      folha.querySelectorAll(".opcao").forEach(x => x.classList.toggle("sel", x === b));
+      document.getElementById("ok").disabled = false;
+    });
+    document.getElementById("ok").onclick = confirmar;
+  }
+  fundo.classList.add("on");
+}
+function fechar() { fundo.classList.remove("on"); }
+
+async function confirmar() {
+  const b = document.getElementById("ok"); b.disabled = true; b.textContent = "Enviando…";
+  try {
+    await API.confirmar(escolhido.id, corrida);
+    try { localStorage.setItem(MEU, escolhido.id); } catch (e) {}
+    escolhido.presente = true; escolhido.inscrito_corrida = escolhido.inscrito_corrida || corrida;
+    folha.innerHTML = `<div class="faixa"></div><div class="sucesso">
+      <div class="grande">✓</div>
+      <h2 class="titulo-ital">Presença confirmada!</h2>
+      <div class="cargo">${esc(escolhido.nome)}</div>
+      <div class="cargo" style="margin-top:6px">${corrida ? "Participando da corrida 🏃" : "Não vai participar da corrida"}</div>
+      <div class="lema">Eu sou Respeito, porque valorizamos as pessoas.</div>
+      <button class="btn" style="width:100%" onclick="fechar()">Fechar</button></div>`;
+    render();
+  } catch (e) {
+    b.disabled = false; b.textContent = "Confirmar presença";
+    toast("Não foi possível confirmar. Verifique a internet e tente de novo.");
+  }
+}
+
+lista.addEventListener("click", e => {
+  const b = e.target.closest(".pessoa"); if (!b) return;
+  abrir(pessoas.find(p => p.id === Number(b.dataset.id)));
+});
+fundo.addEventListener("click", e => { if (e.target === fundo) fechar(); });
+q.addEventListener("input", render);
+
+async function carregar() {
+  try { pessoas = await API.pessoasPublico(); render(); }
+  catch (e) { lista.innerHTML = `<div class="vazio">Não foi possível carregar a lista. Atualize a página.</div>`; }
+}
+if (MODO_DEMO) document.getElementById("demo").hidden = false;
+carregar();
+setInterval(() => { if (!fundo.classList.contains("on")) carregar(); }, 20000);
+</script>
+</body>
+</html>

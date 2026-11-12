@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel – Equipe Amarelo · SIPAT 2026</title>
+<meta name="theme-color" content="#1b1b1b">
+<link rel="icon" href="logo.png">
+<link rel="stylesheet" href="estilo.css">
+<style>
+  :root { --lado: clamp(12px, 2.5vw, 48px); }
+  body { background: var(--creme); overflow-x: hidden; }
+  .cab { background: var(--preto); color: #fff; }
+  .cab .in { padding: 14px var(--lado); display: flex; align-items: center; gap: 16px; }
+  .cab img { width: 64px; height: 64px; border-radius: 50%; background: #fff; flex: none; }
+  .cab h1 { margin: 0; font-size: 22px; line-height: 1.05; color: var(--amarelo); }
+  .cab .sub { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .8; margin-top: 4px; }
+  .cab .esp { flex: 1; }
+  .cab .lema { font-style: italic; font-weight: 900; text-align: right; font-size: 14px; line-height: 1.2; color: #fff; }
+  .cab .lema b { color: var(--amarelo); display: block; font-size: 18px; }
+  .cab .ferr { display: flex; gap: 6px; }
+  .cab .ferr .btn { background: #2c2c2c; color: #fff; }
+
+  nav.abas { position: sticky; top: 0; z-index: 20; background: var(--amarelo); box-shadow: 0 2px 0 rgba(0,0,0,.08); }
+  nav.abas .in { padding: 0 calc(var(--lado) - 12px); display: flex; gap: 4px; overflow-x: auto; }
+  nav.abas button { border: 0; background: none; padding: 14px 14px 12px; font-weight: 800; font-style: italic; text-transform: uppercase;
+                    font-size: 13px; letter-spacing: .03em; border-bottom: 4px solid transparent; white-space: nowrap; }
+  nav.abas button.on { border-bottom-color: var(--preto); }
+
+  main { padding: 22px var(--lado) 80px; }
+  section.aba { display: none; } section.aba.on { display: block; }
+  h2.sec { margin: 0 0 4px; font-size: 26px; }
+  .desc { color: var(--cinza); font-weight: 600; margin: 0 0 18px; }
+  .card { background: #fff; border-radius: var(--raio); box-shadow: var(--sombra); padding: 18px; }
+  .grid { display: grid; gap: 16px; }
+  .g2 { grid-template-columns: 1fr 1fr; } .g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 900px) { .g2, .g3, .g4 { grid-template-columns: 1fr 1fr; } .cab .lema { display: none; } }
+  @media (max-width: 560px) { .g2, .g3, .g4 { grid-template-columns: 1fr; } }
+  .rkg { grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); align-items: start; }
+  @media (max-width: 900px) { .rkg { grid-template-columns: minmax(0,1fr); } }
+  .ativs { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .rot { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--cinza); }
+
+  /* placar */
+  .placar { background: radial-gradient(130% 120% at 0% 0%, #ffd84d, var(--amarelo) 50%, var(--amarelo-forte)); border-radius: 18px;
+            padding: 22px 24px; display: grid; grid-template-columns: auto 1fr; gap: 26px; align-items: center; box-shadow: var(--sombra); position: relative; overflow: hidden; }
+  .placar::after { content: ""; position: absolute; right: 0; bottom: 0; width: 220px; height: 18px;
+                   background: repeating-linear-gradient(-45deg, var(--preto) 0 12px, transparent 12px 24px); opacity: .85; }
+  .anel { width: 170px; height: 170px; border-radius: 50%; display: grid; place-items: center;
+          background: conic-gradient(var(--preto) calc(var(--p) * 1%), rgba(0,0,0,.12) 0); }
+  .anel > div { width: 132px; height: 132px; border-radius: 50%; background: #fff; display: grid; place-items: center; text-align: center; }
+  .anel b { font-size: 46px; font-style: italic; font-weight: 900; line-height: 1; display: block; }
+  .anel span { font-size: 12px; font-weight: 800; color: var(--cinza); }
+  .placar h3 { margin: 0 0 6px; font-size: 30px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
+  .kpi { background: rgba(255,255,255,.85); border-radius: 12px; padding: 10px 12px; }
+  .kpi b { display: block; font-size: 24px; font-style: italic; font-weight: 900; }
+  .kpi span { font-size: 12px; font-weight: 700; color: #4b4436; }
+  @media (max-width: 760px) { .placar { grid-template-columns: 1fr; justify-items: center; text-align: center; } .kpis { grid-template-columns: 1fr 1fr; } }
+
+  .ativ { display: flex; flex-direction: column; gap: 10px; border-top: 6px solid var(--amarelo); }
+  .ativ.ok { border-top-color: var(--verde); }
+  .ativ .t { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+  .ativ h4 { margin: 0; font-size: 16px; }
+  .pts { background: var(--preto); color: var(--amarelo); border-radius: 8px; padding: 4px 8px; font-weight: 900; font-style: italic; white-space: nowrap; font-size: 14px; }
+  .ativ .met { font-weight: 700; color: var(--cinza); font-size: 13px; }
+  select.campo { padding: 9px 10px; font-weight: 700; }
+
+  /* ranking */
+  .rk-topo { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  .total { text-align: right; }
+  .total b { font-size: 40px; font-style: italic; font-weight: 900; line-height: 1; }
+  .podio { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.15fr) minmax(0,1fr); gap: 12px; align-items: end; }
+  .deg { text-align: center; }
+  .deg .pes { padding: 0 6px 10px; }
+  .deg .av { width: 66px; height: 66px; border-radius: 50%; margin: 0 auto 8px; display: grid; place-items: center; font-weight: 900; font-style: italic;
+             font-size: 24px; background: #fff; border: 4px solid var(--amarelo); }
+  .deg.p1 .av { width: 84px; height: 84px; font-size: 30px; border-color: var(--preto); background: var(--amarelo); }
+  .deg .nm { font-weight: 800; font-size: 15px; line-height: 1.2; min-height: 36px; }
+  .deg .pr { font-size: 12px; font-weight: 700; color: var(--cinza); margin-top: 4px; min-height: 16px; }
+  .deg .bloco { border-radius: 12px 12px 0 0; display: grid; place-items: center; color: var(--amarelo); background: var(--preto); padding: 10px 0; }
+  .deg .bloco .pos { font-size: 34px; font-style: italic; font-weight: 900; line-height: 1; }
+  .deg .bloco .q { font-size: 13px; font-weight: 800; color: #fff; }
+  .deg.p1 .bloco { height: 150px; background: linear-gradient(var(--preto), #333); }
+  .deg.p2 .bloco { height: 115px; } .deg.p3 .bloco { height: 90px; }
+  .deg.vazio .bloco { background: #e9dfc6; color: #b9ab86; } .deg.vazio .bloco .q { color: #a0947a; }
+  .quase { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; margin-top: 12px; }
+  .linha-rk { display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 12px; padding: 10px 14px; box-shadow: 0 1px 0 rgba(0,0,0,.05); }
+  .linha-rk .ps { width: 34px; height: 34px; border-radius: 50%; background: var(--amarelo); display: grid; place-items: center; font-weight: 900; font-style: italic; flex: none; }
+  .linha-rk .nm { flex: 1; min-width: 0; font-weight: 800; }
+  .linha-rk .nm small { display: block; font-weight: 600; color: var(--cinza); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .linha-rk .qt { font-weight: 900; font-style: italic; font-size: 18px; }
+  .premio { display: inline-block; background: var(--amarelo-claro); border: 1px solid #f1d98c; color: #6d5200; border-radius: 6px; padding: 2px 6px; font-size: 11px; font-weight: 800; }
+  .empate { color: var(--vermelho); font-size: 11px; font-weight: 800; }
+
+  details.dobra { margin-top: 16px; background: #fff; border-radius: var(--raio); box-shadow: var(--sombra); }
+  details.dobra > summary { cursor: pointer; list-style: none; padding: 16px 18px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; }
+  details.dobra > summary::-webkit-details-marker { display: none; }
+  details.dobra > summary::after { content: "＋"; font-weight: 900; }
+  details.dobra[open] > summary::after { content: "－"; }
+  details.dobra .dentro { padding: 0 18px 18px; }
+  .completo { display: grid; gap: 4px; max-height: 520px; overflow: auto; }
+  .completo .l { display: grid; grid-template-columns: 40px 1fr 160px 56px; gap: 10px; align-items: center; padding: 7px 4px; border-bottom: 1px solid #f3ead2; font-size: 14px; }
+  .completo .l .b { height: 8px; border-radius: 99px; background: #f3ead2; overflow: hidden; }
+  .completo .l .b i { display: block; height: 100%; background: var(--amarelo-forte); }
+  .completo .l .n { font-weight: 700; } .completo .l .n small { color: var(--cinza); font-weight: 600; margin-left: 6px; }
+  .completo .l .v { text-align: right; font-weight: 900; }
+  .completo .l.zero { color: #a59b85; }
+
+  .lancar .res { display: grid; gap: 6px; margin-top: 10px; }
+  .lanc { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; background: var(--creme); }
+  .lanc .nm { flex: 1; min-width: 0; font-weight: 800; font-size: 14px; }
+  .lanc .nm small { display: block; color: var(--cinza); font-weight: 600; font-size: 11px; }
+  .lanc input { width: 64px; text-align: center; font-weight: 900; padding: 6px; border: 2px solid var(--linha); border-radius: 8px; }
+  .dica { font-size: 12px; color: var(--cinza); font-weight: 600; margin-top: 8px; }
+  textarea.campo { min-height: 120px; resize: vertical; }
+
+  /* sorteio */
+  .maquina { background: var(--preto); color: #fff; border-radius: 18px; padding: 22px; position: relative; overflow: hidden; }
+  .maquina h3 { color: var(--amarelo); margin: 0; font-size: 24px; }
+  .tela { margin: 18px 0; background: #111; border: 3px solid var(--amarelo); border-radius: 14px; min-height: 130px; display: grid; place-items: center;
+          text-align: center; padding: 16px; }
+  .tela .nome { font-size: 34px; font-weight: 900; font-style: italic; color: var(--amarelo); line-height: 1.1; }
+  .tela .nome.rodando { color: #fff; opacity: .9; }
+  .tela .info { font-size: 13px; font-weight: 700; color: #bbb; margin-top: 6px; }
+  .tela.vencedor { animation: brilho 1s ease-in-out 3; }
+  @keyframes brilho { 50% { box-shadow: 0 0 0 8px rgba(255,194,14,.35); } }
+  .maquina .linha { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .maquina select { background: #222; color: #fff; border-color: #444; }
+  .maquina label { font-size: 13px; font-weight: 700; display: flex; gap: 6px; align-items: center; }
+  .ganh { display: grid; gap: 8px; margin-top: 12px; }
+  .ganh .g { display: flex; gap: 10px; align-items: center; background: #262626; border-radius: 10px; padding: 10px 12px; }
+  .ganh .g .tr { font-size: 22px; } .ganh .g .x { flex: 1; } .ganh .g .x b { display: block; color: var(--amarelo); }
+  .ganh .g .x span { font-size: 12px; color: #bbb; font-weight: 600; }
+  .ganh .g button { background: none; border: 0; color: #888; font-size: 18px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; background: var(--amarelo-claro); border: 1px solid #f1d98c; border-radius: 99px; padding: 5px 6px 5px 10px; font-weight: 700; font-size: 13px; }
+  .chip button { border: 0; background: rgba(0,0,0,.08); border-radius: 50%; width: 20px; height: 20px; line-height: 1; padding: 0; }
+  .sugest { display: grid; gap: 4px; margin-top: 6px; }
+  .sugest button { text-align: left; border: 0; background: var(--creme); border-radius: 8px; padding: 8px 10px; font-weight: 700; font-size: 14px; }
+  .sugest button:hover { background: var(--amarelo-claro); }
+  .sugest small { color: var(--cinza); font-weight: 600; margin-left: 6px; }
+
+  .toggle { width: 46px; height: 26px; border-radius: 99px; border: 0; background: #ddd2b5; position: relative; flex: none; transition: .15s; }
+  .toggle::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: .15s; }
+  .toggle.on { background: var(--verde); } .toggle.on::after { left: 23px; }
+
+  .filtros { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .filtro { border: 2px solid var(--linha); background: #fff; border-radius: 99px; padding: 7px 12px; font-weight: 800; font-size: 13px; }
+  .filtro.on { background: var(--preto); color: var(--amarelo); border-color: var(--preto); }
+  table.eq { width: 100%; border-collapse: collapse; font-size: 14px; }
+  table.eq th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--cinza); padding: 8px; border-bottom: 2px solid var(--linha); background: #fff; }
+  table.eq td { padding: 8px; border-bottom: 1px solid #f3ead2; vertical-align: middle; }
+  table.eq td.nm b { display: block; } table.eq td.nm small { color: var(--cinza); font-weight: 600; }
+  table.eq td.c { text-align: center; }
+
+  .login { position: fixed; inset: 0; background: var(--preto); display: grid; place-items: center; z-index: 100; padding: 20px; }
+  .login .card { width: 100%; max-width: 380px; text-align: center; }
+  .login img { width: 110px; height: 110px; border-radius: 50%; }
+  .login .campo { margin-top: 10px; }
+  .vazio { color: var(--cinza); font-weight: 600; padding: 12px 0; }
+  @media (max-width: 640px) {
+    .cab .in { gap: 10px; } .cab img { width: 46px; height: 46px; } .cab h1 { font-size: 17px; } .cab .sub { display: none; }
+    h2.sec { font-size: 21px; } .placar { padding: 18px; } .anel { width: 140px; height: 140px; } .anel > div { width: 108px; height: 108px; } .anel b { font-size: 36px; }
+    .placar h3 { font-size: 22px; } .total b { font-size: 30px; }
+    .podio { gap: 6px; } .deg .av { width: 50px; height: 50px; font-size: 18px; } .deg.p1 .av { width: 62px; height: 62px; }
+    .deg .nm { font-size: 13px; } .deg .bloco .pos { font-size: 26px; } .deg.p1 .bloco { height: 120px; } .deg.p2 .bloco { height: 95px; } .deg.p3 .bloco { height: 75px; }
+    .quase { grid-template-columns: 1fr; }
+    .completo .l { grid-template-columns: 36px 1fr 50px; } .completo .l .b { display: none; }
+    .tela .nome { font-size: 24px; }
+    .lanc { flex-wrap: wrap; } .lanc .nm { flex-basis: 100%; }
+    table.eq thead { display: none; }
+    table.eq, table.eq tbody, table.eq tr, table.eq td { display: block; width: 100%; }
+    table.eq tr { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; padding: 12px 0; border-bottom: 1px solid var(--linha); }
+    table.eq td { border: 0; padding: 0; text-align: left !important; display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    table.eq td.nm { grid-column: 1 / -1; display: block; }
+    table.eq td[data-rot]::before { content: attr(data-rot); font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--cinza); min-width: 58px; }
+    table.eq td.at { grid-column: 1 / -1; } table.eq td.at:not(:has(.chip)) { display: none; }
+    .filtros .campo { max-width: none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="demo" class="aviso-demo" hidden>MODO DEMONSTRAÇÃO – os dados ficam só neste navegador. Configure o Supabase em comum.js para usar de verdade.</div>
+
+<div class="login" id="login" hidden>
+  <form class="card" id="fLogin">
+    <img src="logo.png" alt="">
+    <h2 class="titulo-ital" style="margin:12px 0 4px">Painel da equipe</h2>
+    <div class="desc" style="margin:0">Acesso da liderança</div>
+    <input class="campo" id="lEmail" type="email" placeholder="E-mail" required autocomplete="username">
+    <input class="campo" id="lSenha" type="password" placeholder="Senha" required autocomplete="current-password">
+    <button class="btn amarelo" style="width:100%;margin-top:12px">Entrar</button>
+    <div id="lErro" class="empate" style="margin-top:10px"></div>
+  </form>
+</div>
+
+<header class="cab">
+  <div class="in">
+    <img src="logo.png" alt="SIPAT 2026 – Equipe Amarelo">
+    <div>
+      <h1 class="titulo-ital">Painel Equipe Amarelo</h1>
+      <div class="sub">SIPAT 2026 · CIPA</div>
+    </div>
+    <div class="esp"></div>
+    <div class="lema">EU SOU, PORQUE<b>NÓS SOMOS</b></div>
+    <div class="ferr">
+      <button class="btn peq" id="bTela" title="Tela cheia">⛶</button>
+      <button class="btn peq" id="bAtual" title="Atualizar">⟳</button>
+      <button class="btn peq" id="bSair" hidden>Sair</button>
+    </div>
+  </div>
+</header>
+<div class="faixa"></div>
+
+<nav class="abas"><div class="in" id="abas">
+  <button data-aba="geral" class="on">Visão geral</button>
+  <button data-aba="leite">Leite Ninho</button>
+  <button data-aba="alertas">Alertas</button>
+  <button data-aba="corrida">Corrida</button>
+  <button data-aba="tarefas">Paródia &amp; Vídeo</button>
+  <button data-aba="equipe">Equipe</button>
+</div></nav>
+
+<main>
+  <!-- ======================================================= VISÃO GERAL -->
+  <section class="aba on" id="aba-geral">
+    <div class="placar" id="placar"></div>
+    <h2 class="titulo-ital sec" style="margin-top:26px">Atividades</h2>
+    <p class="desc">Marque “Conquistamos” quando a comissão confirmar o resultado. Os pontos entram no placar.</p>
+    <div class="grid ativs" id="ativs"></div>
+    <div class="grid g2" style="margin-top:22px">
+      <div class="card"><div class="rk-topo" style="margin:0 0 10px"><h3 class="titulo-ital" style="margin:0">Top 5 · Leite Ninho</h3><button class="btn peq claro" data-ir="leite">Abrir</button></div><div id="mini-leite"></div></div>
+      <div class="card"><div class="rk-topo" style="margin:0 0 10px"><h3 class="titulo-ital" style="margin:0">Top 5 · Alertas</h3><button class="btn peq claro" data-ir="alertas">Abrir</button></div><div id="mini-alertas"></div></div>
+    </div>
+  </section>
+
+  <!-- ======================================================= RANKINGS -->
+  <section class="aba" id="aba-leite"></section>
+  <section class="aba" id="aba-alertas"></section>
+
+  <!-- ======================================================= CORRIDA -->
+  <section class="aba" id="aba-corrida">
+    <h2 class="titulo-ital sec">Corrida SIPAT</h2>
+    <p class="desc">25 pontos para a equipe com mais inscritos. Entre os participantes da Equipe Amarelo, sorteamos os brindes.</p>
+    <div class="grid g2">
+      <div>
+        <div class="maquina">
+          <div class="rk-topo" style="margin:0"><h3 class="titulo-ital">Sorteio</h3><span class="etiqueta" style="background:var(--amarelo);color:var(--preto)" id="pool"></span></div>
+          <div class="tela" id="tela"><div><div class="nome" id="tNome">?</div><div class="info" id="tInfo">Escolha o prêmio e clique em Sortear</div></div></div>
+          <div class="linha">
+            <select class="campo" id="sPremio" style="flex:1;min-width:180px"></select>
+            <button class="btn amarelo" id="bSortear">Sortear</button>
+          </div>
+          <div class="linha" style="margin-top:10px">
+            <label><input type="checkbox" id="soPres"> Só quem confirmou presença no grupo</label>
+          </div>
+          <div class="linha" id="decide" style="margin-top:12px" hidden>
+            <button class="btn verde" id="bConfirma">Confirmar ganhador</button>
+            <button class="btn" style="background:#333;color:#fff" id="bDenovo">Sortear de novo</button>
+          </div>
+          <div class="ganh" id="ganh"></div>
+        </div>
+        <details class="dobra"><summary>Prêmios do sorteio</summary><div class="dentro">
+          <textarea class="campo" id="pr-corrida"></textarea><div class="dica">Um prêmio por linha.</div>
+          <button class="btn peq" style="margin-top:8px" data-salvar-premios="premios_corrida" data-fonte="pr-corrida">Salvar prêmios</button>
+        </div></details>
+      </div>
+      <div class="card">
+        <div class="rk-topo" style="margin-bottom:10px"><div><div class="rot">Participando da corrida</div><div style="font-size:36px;font-weight:900;font-style:italic" id="nInsc">0</div></div>
+          <div class="filtros"><button class="filtro on" data-fc="todos">Todos</button><button class="filtro" data-fc="sim">Vão correr</button><button class="filtro" data-fc="nao">Não vão</button></div></div>
+        <input class="campo" id="qCorr" placeholder="Buscar pessoa…">
+        <div id="listaCorr" style="margin-top:10px;max-height:560px;overflow:auto"></div>
+        <div class="dica">Quem confirmou pelo link e respondeu “Sim, vou correr” já entra aqui.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================= TAREFAS -->
+  <section class="aba" id="aba-tarefas">
+    <h2 class="titulo-ital sec">Quem faz o quê</h2>
+    <p class="desc">Defina os responsáveis de cada entrega, o andamento e as anotações (ideia, prazo, link do vídeo).</p>
+    <div class="grid g2" id="tarefas"></div>
+  </section>
+
+  <!-- ======================================================= EQUIPE -->
+  <section class="aba" id="aba-equipe">
+    <div class="rk-topo">
+      <div><h2 class="titulo-ital sec">Equipe Amarelo</h2><p class="desc" style="margin:0" id="eqResumo"></p></div>
+      <button class="btn amarelo" id="bCopiar">Copiar quem falta confirmar</button>
+    </div>
+    <div class="card">
+      <div class="filtros" style="margin-bottom:10px">
+        <input class="campo" id="qEq" placeholder="Buscar pessoa…" style="max-width:320px">
+        <button class="filtro on" data-fe="todos">Todos</button>
+        <button class="filtro" data-fe="pres">No grupo</button>
+        <button class="filtro" data-fe="corr">No grupo · vão correr</button>
+        <button class="filtro" data-fe="naocorr">No grupo · não vão correr</button>
+        <button class="filtro" data-fe="pend">Não confirmaram</button>
+      </div>
+      <div style="overflow:auto"><table class="eq"><thead><tr><th>Pessoa</th><th class="c">No grupo</th><th class="c">Corrida</th><th class="c">Latas</th><th class="c">Alertas</th><th>Atividades</th></tr></thead><tbody id="tbEq"></tbody></table></div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="pessoas-demo.js"></script>
+<script src="comum.js"></script>
+<script>
+const S = { pessoas: [], atividades: [], sorteios: [], config: {} };
+const STATUS = [["a_fazer", "A fazer"], ["andamento", "Em andamento"], ["entregue", "Entregue / aguardando"], ["conquistado", "Conquistamos ✓"], ["nao_conquistado", "Não conquistamos"]];
+const RANK = {
+  leite: { campo: "latas", titulo: "Leite Ninho integral", unid: "latas", premios: "premios_leite",
+           desc: "50 pontos para a equipe que mais arrecadar. Aqui, o ranking de quem mais trouxe latas na Equipe Amarelo." },
+  alertas: { campo: "alertas", titulo: "Alertas preventivos", unid: "alertas", premios: "premios_alertas",
+             desc: "35 pontos para a equipe com mais alertas preventivos registrados. Ranking de quem mais registrou." },
+};
+let aba = "geral", girando = false, sorteado = null, fCorr = "todos", fEq = "todos";
+const pessoa = id => S.pessoas.find(p => p.id === id);
+const ativ = id => S.atividades.find(a => a.id === id) || {};
+
+async function carregar() {
+  try { Object.assign(S, await API.tudo()); renderTudo(); }
+  catch (e) { toast("Erro ao carregar: " + e.message); }
+}
+async function salvar(promessa) {
+  try { await promessa; } catch (e) { toast("Não salvou: " + e.message); await carregar(); }
+}
+
+// ----------------------------------------------------------------- abas
+document.getElementById("abas").addEventListener("click", e => { const b = e.target.closest("button"); if (b) irPara(b.dataset.aba); });
+document.addEventListener("click", e => { const b = e.target.closest("[data-ir]"); if (b) irPara(b.dataset.ir); });
+function irPara(a) {
+  aba = a;
+  document.querySelectorAll("#abas button").forEach(b => b.classList.toggle("on", b.dataset.aba === a));
+  document.querySelectorAll("section.aba").forEach(s => s.classList.toggle("on", s.id === "aba-" + a));
+  renderTudo(); window.scrollTo({ top: 0 });
+}
+
+function renderTudo() { renderGeral(); renderRanking("leite"); renderRanking("alertas"); renderCorrida(); renderTarefas(); renderEquipe(); }
+
+// ----------------------------------------------------------------- visão geral
+function renderGeral() {
+  const total = S.atividades.reduce((s, a) => s + a.pontos, 0) || 160;
+  const pts = S.atividades.filter(a => a.status === "conquistado").reduce((s, a) => s + a.pontos, 0);
+  const pres = S.pessoas.filter(p => p.presente).length, insc = S.pessoas.filter(p => p.inscrito_corrida).length;
+  const latas = S.pessoas.reduce((s, p) => s + (p.latas || 0), 0), alertas = S.pessoas.reduce((s, p) => s + (p.alertas || 0), 0);
+  placar.innerHTML = `
+    <div class="anel" style="--p:${Math.round(pts / total * 100)}"><div><div><b>${pts}</b><span>de ${total} pontos</span></div></div></div>
+    <div><span class="etiqueta">Pontuação da equipe</span>
+      <h3 class="titulo-ital" style="margin-top:8px">Rumo a Equipe Campeã</h3>
+      <div style="font-weight:700">Eu sou Respeito, porque valorizamos as pessoas.</div>
+      <div class="kpis">
+        <div class="kpi"><b>${pres}/${S.pessoas.length}</b><span>no grupo · ${S.pessoas.length - pres} faltam</span></div>
+        <div class="kpi"><b>${insc}</b><span>participando da corrida</span></div>
+        <div class="kpi"><b>${latas}</b><span>latas de Leite Ninho</span></div>
+        <div class="kpi"><b>${alertas}</b><span>alertas preventivos</span></div>
+      </div></div>`;
+  const metrica = a => ({
+    leite: `${latas} latas · ${S.pessoas.filter(p => p.latas > 0).length} ${S.pessoas.filter(p => p.latas > 0).length === 1 ? 'pessoa contribuiu' : 'pessoas contribuíram'}`,
+    alertas: `${alertas} alertas · ${S.pessoas.filter(p => p.alertas > 0).length} pessoas registraram`,
+    corrida: `${insc} participando · ${S.sorteios.length} brindes sorteados`,
+  }[a.id] || (a.responsaveis?.length ? "Responsáveis: " + a.responsaveis.map(id => curto(pessoa(id)?.nome || "?")).join(", ") : "Sem responsáveis definidos"));
+  ativs.innerHTML = S.atividades.map(a => `
+    <div class="card ativ ${a.status === "conquistado" ? "ok" : ""}">
+      <div class="t"><h4>${esc(a.nome)}</h4><span class="pts">${a.pontos} pts</span></div>
+      <div class="met">${esc(metrica(a))}</div>
+      <select class="campo" data-status="${a.id}">${STATUS.map(([v, t]) => `<option value="${v}" ${a.status === v ? "selected" : ""}>${t}</option>`).join("")}</select>
+    </div>`).join("");
+  ["leite", "alertas"].forEach(k => {
+    const c = RANK[k].campo, top = ordenar(c).filter(x => x.p[c] > 0).slice(0, 5);
+    document.getElementById("mini-" + k).innerHTML = top.length ? `<div class="grid" style="gap:6px">${top.map(x => linhaRk(x, k)).join("")}</div>`
+      : `<div class="vazio">Ninguém lançado ainda.</div>`;
+  });
+}
+document.addEventListener("change", e => {
+  const s = e.target.closest("[data-status]"); if (!s) return;
+  const a = ativ(s.dataset.status); a.status = s.value; renderTudo();
+  salvar(API.atualizarAtividade(a.id, { status: s.value }));
+});
+
+// ----------------------------------------------------------------- rankings
+function ordenar(campo) {
+  const arr = [...S.pessoas].sort((a, b) => (b[campo] || 0) - (a[campo] || 0) || a.nome.localeCompare(b.nome));
+  return arr.map((p, i) => ({ p, i, pos: 1 + arr.filter(x => (x[campo] || 0) > (p[campo] || 0)).length,
+                              emp: arr.filter(x => (x[campo] || 0) === (p[campo] || 0)).length > 1 }));
+}
+const premioDe = (k, i) => (S.config[RANK[k].premios] || [])[i] || "";
+function linhaRk(x, k) {
+  const pr = premioDe(k, x.i);
+  return `<div class="linha-rk"><span class="ps">${x.pos}º</span>
+    <span class="nm">${esc(x.p.nome)}<small>${pr ? `<span class="premio">${esc(pr)}</span> ` : ""}${x.emp ? '<span class="empate">empate</span>' : ""}</small></span>
+    <span class="qt">${x.p[RANK[k].campo]}</span></div>`;
+}
+
+function montarRanking(k) {
+  const r = RANK[k];
+  document.getElementById("aba-" + k).innerHTML = `
+    <div class="rk-topo"><div><h2 class="titulo-ital sec">${r.titulo}</h2><p class="desc" style="margin:0;max-width:640px">${r.desc}</p></div>
+      <div class="total"><b id="tot-${k}">0</b><div class="rot">${r.unid} no total</div></div></div>
+    <div class="grid rkg" id="rkg-${k}">
+      <div><div class="podio" id="podio-${k}"></div><div class="quase" id="quase-${k}"></div></div>
+      <div class="card lancar">
+        <div class="rot">Lançar ${r.unid}</div>
+        <input class="campo" id="ql-${k}" placeholder="Buscar pessoa…" style="margin-top:8px">
+        <div class="res" id="res-${k}"></div>
+        <div class="dica">Use + e − ou digite o total da pessoa.</div>
+      </div>
+    </div>
+    <details class="dobra"><summary id="sum-${k}">Ranking completo</summary><div class="dentro"><div class="completo" id="comp-${k}"></div></div></details>
+    <details class="dobra"><summary>Prêmios deste ranking</summary><div class="dentro">
+      <textarea class="campo" id="pr-${k}"></textarea><div class="dica">Um prêmio por linha, na ordem de colocação (1º, 2º, 3º…).</div>
+      <button class="btn peq" style="margin-top:8px" data-salvar-premios="${r.premios}" data-fonte="pr-${k}">Salvar prêmios</button>
+    </div></details>`;
+  document.getElementById("ql-" + k).addEventListener("input", () => renderLancar(k));
+  document.getElementById("pr-" + k).value = (S.config[r.premios] || []).join("\n");
+}
+
+function renderRanking(k) {
+  const r = RANK[k], c = r.campo, rk = ordenar(c), ativos = rk.filter(x => x.p[c] > 0);
+  if (!document.getElementById("podio-" + k)) montarRanking(k);
+  document.getElementById("tot-" + k).textContent = S.pessoas.reduce((s, p) => s + (p[c] || 0), 0);
+  const deg = n => {
+    const x = ativos[n - 1];
+    if (!x) return `<div class="deg p${n} vazio"><div class="pes"><div class="av">?</div><div class="nm">—</div><div class="pr">${esc(premioDe(k, n - 1))}</div></div><div class="bloco"><div class="pos">${n}º</div><div class="q">vago</div></div></div>`;
+    return `<div class="deg p${n}"><div class="pes"><div class="av">${esc(x.p.nome[0])}</div><div class="nm">${esc(curto(x.p.nome))}</div>
+      <div class="pr">${esc(premioDe(k, n - 1))}${x.emp ? ' <span class="empate">empate</span>' : ""}</div></div>
+      <div class="bloco"><div class="pos">${x.pos}º</div><div class="q">${x.p[c]} ${r.unid}</div></div></div>`;
+  };
+  document.getElementById("podio-" + k).innerHTML = deg(2) + deg(1) + deg(3);
+  document.getElementById("quase-" + k).innerHTML = ativos.slice(3, 5).map(x => linhaRk(x, k)).join("");
+  const max = Math.max(1, ...rk.map(x => x.p[c] || 0));
+  document.getElementById("sum-" + k).textContent = `Ver ranking completo · todas as ${S.pessoas.length} pessoas`;
+  document.getElementById("comp-" + k).innerHTML = rk.map(x => `
+    <div class="l ${x.p[c] ? "" : "zero"}"><span><b>${x.p[c] ? x.pos + "º" : "–"}</b></span>
+      <span class="n">${esc(x.p.nome)}${x.p[c] && premioDe(k, x.i) ? ` <span class="premio">${esc(premioDe(k, x.i))}</span>` : ""}</span>
+      <span class="b"><i style="width:${(x.p[c] || 0) / max * 100}%"></i></span><span class="v">${x.p[c] || 0}</span></div>`).join("");
+  const ta = document.getElementById("pr-" + k); if (document.activeElement !== ta) ta.value = (S.config[r.premios] || []).join("\n");
+  renderLancar(k);
+}
+
+function renderLancar(k) {
+  const c = RANK[k].campo, q = document.getElementById("ql-" + k).value;
+  const box = document.getElementById("res-" + k);
+  if (box.contains(document.activeElement) && document.activeElement.tagName === "INPUT") return;
+  if (!q.trim()) { box.innerHTML = ""; return; }
+  const res = busca(S.pessoas, q).slice(0, 8);
+  box.innerHTML = res.length ? res.map(p => `
+    <div class="lanc"><span class="nm">${esc(p.nome)}<small>${esc(p.cargo)}</small></span>
+      <button class="btn peq claro" data-mais="${k}|${p.id}|-1">−</button>
+      <input type="number" min="0" value="${p[c] || 0}" data-set="${k}|${p.id}">
+      <button class="btn peq" data-mais="${k}|${p.id}|1">+1</button>
+      <button class="btn peq amarelo" data-mais="${k}|${p.id}|5">+5</button></div>`).join("")
+    : `<div class="vazio">Ninguém encontrado.</div>`;
+}
+function definir(k, id, valor) {
+  const c = RANK[k].campo, p = pessoa(id); valor = Math.max(0, Math.round(Number(valor) || 0));
+  if (p[c] === valor) return;
+  p[c] = valor; renderTudo(); salvar(API.atualizarPessoa(id, { [c]: valor }));
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-mais]"); if (!b) return;
+  const [k, id, d] = b.dataset.mais.split("|"); const p = pessoa(Number(id));
+  definir(k, p.id, (p[RANK[k].campo] || 0) + Number(d));
+});
+document.addEventListener("change", e => {
+  const i = e.target.closest("[data-set]"); if (!i) return;
+  const [k, id] = i.dataset.set.split("|"); i.blur(); definir(k, Number(id), i.value);
+});
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-salvar-premios]"); if (!b) return;
+  const lista = document.getElementById(b.dataset.fonte).value.split("\n").map(s => s.trim()).filter(Boolean);
+  S.config[b.dataset.salvarPremios] = lista; renderTudo();
+  await salvar(API.setConfig(b.dataset.salvarPremios, lista)); toast("Prêmios salvos");
+});
+
+// ----------------------------------------------------------------- corrida
+function poolSorteio() {
+  const ganh = new Set(S.sorteios.map(s => s.pessoa_id));
+  return S.pessoas.filter(p => p.inscrito_corrida && !ganh.has(p.id) && (!soPres.checked || p.presente));
+}
+function renderCorrida() {
+  const insc = S.pessoas.filter(p => p.inscrito_corrida);
+  nInsc.textContent = insc.length;
+  pool.textContent = `${poolSorteio().length} no sorteio`;
+  const premios = S.config.premios_corrida || [];
+  const usados = S.sorteios.map(s => s.premio);
+  const restantes = [...premios]; usados.forEach(u => { const i = restantes.indexOf(u); if (i >= 0) restantes.splice(i, 1); });
+  const atual = sPremio.value;
+  sPremio.innerHTML = restantes.length ? restantes.map(p => `<option ${p === atual ? "selected" : ""}>${esc(p)}</option>`).join("")
+    : `<option value="">Todos os prêmios já foram sorteados</option>`;
+  bSortear.disabled = girando || !restantes.length || !poolSorteio().length;
+  ganh.innerHTML = S.sorteios.map(s => `<div class="g"><span class="tr">🏆</span><span class="x"><b>${esc(pessoa(s.pessoa_id)?.nome || "?")}</b><span>${esc(s.premio)}</span></span>
+    <button title="Desfazer" data-del-sorteio="${s.id}">×</button></div>`).join("");
+  const ta = document.getElementById("pr-corrida"); if (document.activeElement !== ta) ta.value = premios.join("\n");
+
+  let lista = busca(S.pessoas, qCorr.value);
+  if (fCorr === "sim") lista = lista.filter(p => p.inscrito_corrida);
+  if (fCorr === "nao") lista = lista.filter(p => !p.inscrito_corrida);
+  listaCorr.innerHTML = lista.map(p => `<div class="lanc" style="background:none;border-bottom:1px solid #f3ead2;border-radius:0">
+      <span class="nm">${esc(p.nome)}<small>${esc(p.cargo)}${p.presente ? " · no grupo" : ""}</small></span>
+      <button class="toggle ${p.inscrito_corrida ? "on" : ""}" data-insc="${p.id}" aria-label="Participa da corrida"></button></div>`).join("")
+    || `<div class="vazio">Ninguém aqui.</div>`;
+}
+qCorr.addEventListener("input", renderCorrida);
+soPres.addEventListener("change", renderCorrida);
+document.querySelectorAll("[data-fc]").forEach(b => b.onclick = () => {
+  fCorr = b.dataset.fc; document.querySelectorAll("[data-fc]").forEach(x => x.classList.toggle("on", x === b)); renderCorrida();
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-insc]"); if (!b) return;
+  const p = pessoa(Number(b.dataset.insc)); p.inscrito_corrida = !p.inscrito_corrida; renderTudo();
+  salvar(API.atualizarPessoa(p.id, { inscrito_corrida: p.inscrito_corrida }));
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-del-sorteio]"); if (!b) return;
+  if (!confirm("Desfazer este resultado do sorteio?")) return;
+  const id = Number(b.dataset.delSorteio); S.sorteios = S.sorteios.filter(s => s.id !== id); renderTudo();
+  salvar(API.delSorteio(id));
+});
+function aleatorio(n) { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; }
+bSortear.onclick = () => {
+  const pl = poolSorteio(); if (!pl.length || girando) return;
+  girando = true; sorteado = pl[aleatorio(pl.length)]; decide.hidden = true;
+  tela.classList.remove("vencedor"); bSortear.disabled = true; tInfo.textContent = "Sorteando…";
+  let t = 0, passo = 50;
+  const gira = () => {
+    tNome.className = "nome rodando"; tNome.textContent = pl[aleatorio(pl.length)].nome;
+    t += passo; passo *= 1.09;
+    if (t < 3600) setTimeout(gira, passo);
+    else {
+      tNome.className = "nome"; tNome.textContent = sorteado.nome; tInfo.textContent = `${sorteado.cargo} · ${sPremio.value}`;
+      tela.classList.add("vencedor"); decide.hidden = false; girando = false;
+    }
+  };
+  gira();
+};
+bDenovo.onclick = () => { decide.hidden = true; sorteado = null; tNome.textContent = "?"; tInfo.textContent = "Escolha o prêmio e clique em Sortear"; renderCorrida(); };
+bConfirma.onclick = async () => {
+  if (!sorteado) return;
+  const premio = sPremio.value; decide.hidden = true;
+  tInfo.textContent = `Parabéns! ${premio}`;
+  S.sorteios.push({ id: -Date.now(), premio, pessoa_id: sorteado.id }); sorteado = null; renderTudo();
+  await salvar(API.addSorteio(premio, S.sorteios[S.sorteios.length - 1].pessoa_id)); await carregar();
+};
+
+// ----------------------------------------------------------------- tarefas (paródia & vídeo)
+const buscaTarefa = {};
+function renderTarefas() {
+  const box = document.getElementById("tarefas");
+  const tipos = S.atividades.filter(a => a.tipo === "responsaveis");
+  if (box.children.length !== tipos.length) {
+    box.innerHTML = tipos.map(a => `
+      <div class="card ativ" id="tf-${a.id}">
+        <div class="t"><h4 class="titulo-ital" style="font-size:20px">${esc(a.nome)}</h4><span class="pts">${a.pontos} pts</span></div>
+        <select class="campo" data-status="${a.id}"></select>
+        <div><div class="rot" style="margin-bottom:6px">Responsáveis</div><div class="chips" id="ch-${a.id}"></div></div>
+        <div><input class="campo" placeholder="Adicionar pessoa…" data-busca-tf="${a.id}"><div class="sugest" id="sg-${a.id}"></div></div>
+        <div><div class="rot" style="margin-bottom:6px">Anotações</div><textarea class="campo" data-obs="${a.id}" placeholder="Ideia, prazo, link do vídeo…" style="min-height:90px"></textarea></div>
+      </div>`).join("");
+  }
+  tipos.forEach(a => {
+    const card = document.getElementById("tf-" + a.id);
+    card.classList.toggle("ok", a.status === "conquistado");
+    card.querySelector("[data-status]").innerHTML = STATUS.map(([v, t]) => `<option value="${v}" ${a.status === v ? "selected" : ""}>${t}</option>`).join("");
+    document.getElementById("ch-" + a.id).innerHTML = (a.responsaveis || []).map(id =>
+      `<span class="chip">${esc(pessoa(id)?.nome || "?")}<button data-rem="${a.id}|${id}" title="Remover">×</button></span>`).join("")
+      || `<span class="vazio" style="padding:0">Ninguém ainda.</span>`;
+    const ta = card.querySelector("[data-obs]"); if (document.activeElement !== ta) ta.value = a.obs || "";
+    const q = buscaTarefa[a.id] || "";
+    document.getElementById("sg-" + a.id).innerHTML = q.trim() ? busca(S.pessoas, q).filter(p => !(a.responsaveis || []).includes(p.id)).slice(0, 6)
+      .map(p => `<button data-add="${a.id}|${p.id}">${esc(p.nome)}<small>${esc(p.cargo)}</small></button>`).join("") : "";
+  });
+}
+document.addEventListener("input", e => {
+  const i = e.target.closest("[data-busca-tf]"); if (!i) return;
+  buscaTarefa[i.dataset.buscaTf] = i.value; renderTarefas();
+});
+document.addEventListener("click", e => {
+  const add = e.target.closest("[data-add]"), rem = e.target.closest("[data-rem]");
+  if (!add && !rem) return;
+  const [aid, pid] = (add || rem).dataset[add ? "add" : "rem"].split("|"); const a = ativ(aid);
+  a.responsaveis = add ? [...(a.responsaveis || []), Number(pid)] : (a.responsaveis || []).filter(x => x !== Number(pid));
+  if (add) { buscaTarefa[aid] = ""; document.querySelector(`[data-busca-tf="${aid}"]`).value = ""; }
+  renderTudo(); salvar(API.atualizarAtividade(aid, { responsaveis: a.responsaveis }));
+});
+document.addEventListener("change", e => {
+  const t = e.target.closest("[data-obs]"); if (!t) return;
+  const a = ativ(t.dataset.obs); if (a.obs === t.value) return;
+  a.obs = t.value; salvar(API.atualizarAtividade(a.id, { obs: t.value })).then(() => toast("Anotação salva"));
+});
+
+// ----------------------------------------------------------------- equipe
+function renderEquipe() {
+  const pres = S.pessoas.filter(p => p.presente).length;
+  const corre = S.pessoas.filter(p => p.presente && p.inscrito_corrida).length;
+  eqResumo.textContent = `${S.pessoas.length} pessoas · ${pres} no grupo (${corre} vão correr, ${pres - corre} não vão) · ${S.pessoas.length - pres} não confirmaram`;
+  const tarefasDe = id => S.atividades.filter(a => (a.responsaveis || []).includes(id)).map(a => a.nome.replace("Melhor ", ""));
+  let lista = busca(S.pessoas, qEq.value);
+  if (fEq === "pres") lista = lista.filter(p => p.presente);
+  if (fEq === "pend") lista = lista.filter(p => !p.presente);
+  if (fEq === "corr") lista = lista.filter(p => p.presente && p.inscrito_corrida);
+  if (fEq === "naocorr") lista = lista.filter(p => p.presente && !p.inscrito_corrida);
+  tbEq.innerHTML = lista.map(p => `<tr>
+    <td class="nm"><b>${esc(p.nome)}</b><small>${esc(p.cargo)}</small></td>
+    <td class="c" data-rot="Grupo"><button class="toggle ${p.presente ? "on" : ""}" data-pres="${p.id}" aria-label="No grupo"></button></td>
+    <td class="c" data-rot="Corrida"><button class="toggle ${p.inscrito_corrida ? "on" : ""}" data-insc="${p.id}" aria-label="Corrida"></button></td>
+    <td class="c" data-rot="Latas">${p.latas || 0}</td><td class="c" data-rot="Alertas">${p.alertas || 0}</td>
+    <td class="at"><div class="chips">${tarefasDe(p.id).map(t => `<span class="chip" style="padding-right:10px">${esc(t)}</span>`).join("")}</div></td></tr>`).join("")
+    || `<tr><td colspan="6" class="vazio">Ninguém aqui.</td></tr>`;
+}
+qEq.addEventListener("input", renderEquipe);
+document.querySelectorAll("[data-fe]").forEach(b => b.onclick = () => {
+  fEq = b.dataset.fe; document.querySelectorAll("[data-fe]").forEach(x => x.classList.toggle("on", x === b)); renderEquipe();
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-pres]"); if (!b) return;
+  const p = pessoa(Number(b.dataset.pres)); p.presente = !p.presente; renderTudo();
+  salvar(API.atualizarPessoa(p.id, { presente: p.presente }));
+});
+bCopiar.onclick = async () => {
+  const pend = S.pessoas.filter(p => !p.presente).map(p => "• " + p.nome);
+  const txt = `Ainda não confirmaram presença no grupo da Equipe Amarelo (${pend.length}):\n` + pend.join("\n");
+  try { await navigator.clipboard.writeText(txt); toast(`Lista copiada (${pend.length} pessoas)`); }
+  catch (e) { prompt("Copie a lista:", txt); }
+};
+
+// ----------------------------------------------------------------- topo, login, início
+bTela.onclick = () => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
+bAtual.onclick = () => carregar().then(() => toast("Atualizado"));
+bSair.onclick = async () => { await API.sair(); location.reload(); };
+fLogin.onsubmit = async e => {
+  e.preventDefault(); lErro.textContent = "";
+  try { await API.login(lEmail.value, lSenha.value); login.hidden = true; bSair.hidden = false; iniciar(); }
+  catch (err) { lErro.textContent = "E-mail ou senha incorretos."; }
+};
+let iniciado = false;
+function iniciar() {
+  if (iniciado) return; iniciado = true; carregar();
+  setInterval(() => {
+    const foco = document.activeElement;
+    if (girando || decide.hidden === false || (foco && /INPUT|TEXTAREA|SELECT/.test(foco.tagName))) return;
+    carregar();
+  }, 20000);
+}
+(async () => {
+  if (MODO_DEMO) { document.getElementById("demo").hidden = false; iniciar(); return; }
+  if (await API.sessao()) { bSair.hidden = false; iniciar(); } else login.hidden = false;
+})();
+</script>
+</body>
+</html>
