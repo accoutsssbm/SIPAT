@@ -4,8 +4,8 @@
 //  Enquanto estiver vazio, as páginas rodam em MODO DEMONSTRAÇÃO,
 //  salvando só no navegador de quem abriu.
 // =====================================================================
-const SUPABASE_URL = "";
-const SUPABASE_ANON_KEY = "";
+const SUPABASE_URL = "https://oweyzatryklvosvntoqq.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_3fSYMreMdD5KhmEHxp85bQ_xU0C0giS";
 // =====================================================================
 
 const MODO_DEMO = !SUPABASE_URL || !SUPABASE_ANON_KEY;
