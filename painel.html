@@ -297,8 +297,20 @@
   <section class="aba" id="aba-equipe">
     <div class="rk-topo">
       <div><h2 class="titulo-ital sec">Equipe Amarelo</h2><p class="desc" style="margin:0" id="eqResumo"></p></div>
-      <button class="btn amarelo" id="bCopiar">Copiar quem falta confirmar</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn editar" id="bNova">+ Adicionar pessoa</button>
+        <button class="btn amarelo" id="bCopiar">Copiar quem falta confirmar</button>
+      </div>
     </div>
+    <form class="card editar" id="fNova" hidden style="margin-bottom:14px">
+      <div class="rot" style="margin-bottom:8px">Nova pessoa na equipe</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input class="campo" id="nNome" placeholder="Nome completo" required style="flex:2;min-width:200px">
+        <input class="campo" id="nCargo" placeholder="Cargo" style="flex:1;min-width:160px">
+        <button class="btn verde" id="bSalvarNova">Adicionar</button>
+        <button class="btn claro" type="button" id="bCancelaNova">Cancelar</button>
+      </div>
+    </form>
     <div class="card">
       <div class="filtros" style="margin-bottom:10px">
         <input class="campo" id="qEq" placeholder="Buscar pessoa…" style="max-width:320px">
@@ -643,6 +655,20 @@ document.addEventListener("click", e => {
   const p = pessoa(Number(b.dataset.pres)); p.presente = !p.presente; renderTudo();
   salvar(API.atualizarPessoa(p.id, { presente: p.presente }));
 });
+bNova.onclick = () => { fNova.hidden = false; nNome.focus(); };
+bCancelaNova.onclick = () => { fNova.reset(); fNova.hidden = true; };
+fNova.onsubmit = async e => {
+  e.preventDefault();
+  const nome = nNome.value.trim().replace(/\s+/g, " "), cargo = nCargo.value.trim();
+  if (!nome) return;
+  if (S.pessoas.some(p => norm(p.nome) === norm(nome)) && !confirm(`Já existe "${nome}" na lista. Adicionar mesmo assim?`)) return;
+  bSalvarNova.disabled = true;
+  try {
+    await API.addPessoa(nome, cargo);
+    fNova.reset(); fNova.hidden = true; await carregar(); toast(`${nome} adicionado(a) à equipe`);
+  } catch (err) { toast("Não salvou: " + err.message); }
+  bSalvarNova.disabled = false;
+};
 bCopiar.onclick = async () => {
   const pend = S.pessoas.filter(p => !p.presente).map(p => "• " + p.nome);
   const txt = `Ainda não confirmaram presença no grupo da Equipe Amarelo (${pend.length}):\n` + pend.join("\n");

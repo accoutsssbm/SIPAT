@@ -85,6 +85,14 @@ const API = {
     c.data.forEach(r => { config[r.chave] = r.valor; });
     return { pessoas: p.data, atividades: a.data, sorteios: s.data, config };
   },
+  async addPessoa(nome, cargo) {
+    if (MODO_DEMO) {
+      const d = demoLer(); const id = Math.max(0, ...d.pessoas.map(p => p.id)) + 1;
+      d.pessoas.push({ id, nome, cargo, presente: false, presente_em: null, inscrito_corrida: false, latas: 0, alertas: 0 });
+      d.pessoas.sort((x, y) => x.nome.localeCompare(y.nome)); demoGravar(d); return;
+    }
+    const { error } = await sb.from("pessoas").insert({ nome, cargo }); falhou(error);
+  },
   async atualizarPessoa(id, patch) {
     if (MODO_DEMO) { const d = demoLer(); Object.assign(d.pessoas.find(x => x.id === id), patch); demoGravar(d); return; }
     const { error } = await sb.from("pessoas").update(patch).eq("id", id); falhou(error);
