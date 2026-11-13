@@ -179,6 +179,14 @@
     table.eq td.at { grid-column: 1 / -1; } table.eq td.at:not(:has(.chip)) { display: none; }
     .filtros .campo { max-width: none !important; }
   }
+
+  /* ---- modo somente visualização (painel.html?ver) ---- */
+  .modo-ver { display: none; background: var(--amarelo); color: var(--preto); font-size: 12px; font-weight: 800; border-radius: 99px; padding: 6px 10px; white-space: nowrap; }
+  body.ver .modo-ver { display: inline-flex; align-items: center; }
+  body.ver .editar, body.ver [data-del-sorteio], body.ver [data-rem] { display: none !important; }
+  body.ver .rkg { grid-template-columns: minmax(0,1fr); }
+  body.ver .toggle, body.ver select[data-status] { pointer-events: none; }
+  body.ver select[data-status] { opacity: 1; color: var(--preto); }
 </style>
 </head>
 <body>
@@ -208,6 +216,7 @@
     <div class="ferr">
       <button class="btn peq" id="bTela" title="Tela cheia">⛶</button>
       <button class="btn peq" id="bAtual" title="Atualizar">⟳</button>
+      <span class="modo-ver">Somente visualização</span>
       <button class="btn peq" id="bSair" hidden>Sair</button>
     </div>
   </div>
@@ -248,21 +257,21 @@
       <div>
         <div class="maquina">
           <div class="rk-topo" style="margin:0"><h3 class="titulo-ital">Sorteio</h3><span class="etiqueta" style="background:var(--amarelo);color:var(--preto)" id="pool"></span></div>
-          <div class="tela" id="tela"><div><div class="nome" id="tNome">?</div><div class="info" id="tInfo">Escolha o prêmio e clique em Sortear</div></div></div>
-          <div class="linha">
+          <div class="tela editar" id="tela"><div><div class="nome" id="tNome">?</div><div class="info" id="tInfo">Escolha o prêmio e clique em Sortear</div></div></div>
+          <div class="linha editar">
             <select class="campo" id="sPremio" style="flex:1;min-width:180px"></select>
             <button class="btn amarelo" id="bSortear">Sortear</button>
           </div>
-          <div class="linha" style="margin-top:10px">
+          <div class="linha editar" style="margin-top:10px">
             <label><input type="checkbox" id="soPres"> Só quem confirmou presença no grupo</label>
           </div>
-          <div class="linha" id="decide" style="margin-top:12px" hidden>
+          <div class="linha editar" id="decide" style="margin-top:12px" hidden>
             <button class="btn verde" id="bConfirma">Confirmar ganhador</button>
             <button class="btn" style="background:#333;color:#fff" id="bDenovo">Sortear de novo</button>
           </div>
           <div class="ganh" id="ganh"></div>
         </div>
-        <details class="dobra"><summary>Prêmios do sorteio</summary><div class="dentro">
+        <details class="dobra editar"><summary>Prêmios do sorteio</summary><div class="dentro">
           <textarea class="campo" id="pr-corrida"></textarea><div class="dica">Um prêmio por linha.</div>
           <button class="btn peq" style="margin-top:8px" data-salvar-premios="premios_corrida" data-fonte="pr-corrida">Salvar prêmios</button>
         </div></details>
@@ -308,6 +317,7 @@
 <script src="pessoas-demo.js"></script>
 <script src="comum.js"></script>
 <script>
+const SO_VER = new URLSearchParams(location.search).has("ver");
 const S = { pessoas: [], atividades: [], sorteios: [], config: {} };
 const STATUS = [["a_fazer", "A fazer"], ["andamento", "Em andamento"], ["entregue", "Entregue / aguardando"], ["conquistado", "Conquistamos ✓"], ["nao_conquistado", "Não conquistamos"]];
 const RANK = {
@@ -325,6 +335,7 @@ async function carregar() {
   catch (e) { toast("Erro ao carregar: " + e.message); }
 }
 async function salvar(promessa) {
+  if (SO_VER) return;
   try { await promessa; } catch (e) { toast("Não salvou: " + e.message); await carregar(); }
 }
 
@@ -338,7 +349,20 @@ function irPara(a) {
   renderTudo(); window.scrollTo({ top: 0 });
 }
 
-function renderTudo() { renderGeral(); renderRanking("leite"); renderRanking("alertas"); renderCorrida(); renderTarefas(); renderEquipe(); }
+function renderTudo() { renderGeral(); renderRanking("leite"); renderRanking("alertas"); renderCorrida(); renderTarefas(); renderEquipe(); if (SO_VER) travarCampos(); }
+
+// ----------------------------------------------------------------- modo somente visualização
+const EDICAO = "[data-status],[data-mais],[data-set],[data-salvar-premios],[data-insc],[data-pres],[data-del-sorteio],[data-add],[data-rem],[data-obs],[data-busca-tf],#bSortear,#bConfirma,#bDenovo";
+if (SO_VER) {
+  document.body.classList.add("ver");
+  ["click", "change", "input"].forEach(tipo => window.addEventListener(tipo, e => {
+    if (e.target.closest?.(EDICAO)) { e.stopImmediatePropagation(); e.preventDefault(); }
+  }, true));
+}
+function travarCampos() {
+  document.querySelectorAll("select[data-status]").forEach(el => el.disabled = true);
+  document.querySelectorAll("textarea[data-obs]").forEach(el => el.readOnly = true);
+}
 
 // ----------------------------------------------------------------- visão geral
 function renderGeral() {
@@ -401,7 +425,7 @@ function montarRanking(k) {
       <div class="total"><b id="tot-${k}">0</b><div class="rot">${r.unid} no total</div></div></div>
     <div class="grid rkg" id="rkg-${k}">
       <div><div class="podio" id="podio-${k}"></div><div class="quase" id="quase-${k}"></div></div>
-      <div class="card lancar">
+      <div class="card lancar editar">
         <div class="rot">Lançar ${r.unid}</div>
         <input class="campo" id="ql-${k}" placeholder="Buscar pessoa…" style="margin-top:8px">
         <div class="res" id="res-${k}"></div>
@@ -409,7 +433,7 @@ function montarRanking(k) {
       </div>
     </div>
     <details class="dobra"><summary id="sum-${k}">Ranking completo</summary><div class="dentro"><div class="completo" id="comp-${k}"></div></div></details>
-    <details class="dobra"><summary>Prêmios deste ranking</summary><div class="dentro">
+    <details class="dobra editar"><summary>Prêmios deste ranking</summary><div class="dentro">
       <textarea class="campo" id="pr-${k}"></textarea><div class="dica">Um prêmio por linha, na ordem de colocação (1º, 2º, 3º…).</div>
       <button class="btn peq" style="margin-top:8px" data-salvar-premios="${r.premios}" data-fonte="pr-${k}">Salvar prêmios</button>
     </div></details>`;
@@ -556,7 +580,7 @@ function renderTarefas() {
         <div class="t"><h4 class="titulo-ital" style="font-size:20px">${esc(a.nome)}</h4><span class="pts">${a.pontos} pts</span></div>
         <select class="campo" data-status="${a.id}"></select>
         <div><div class="rot" style="margin-bottom:6px">Responsáveis</div><div class="chips" id="ch-${a.id}"></div></div>
-        <div><input class="campo" placeholder="Adicionar pessoa…" data-busca-tf="${a.id}"><div class="sugest" id="sg-${a.id}"></div></div>
+        <div class="editar"><input class="campo" placeholder="Adicionar pessoa…" data-busca-tf="${a.id}"><div class="sugest" id="sg-${a.id}"></div></div>
         <div><div class="rot" style="margin-bottom:6px">Anotações</div><textarea class="campo" data-obs="${a.id}" placeholder="Ideia, prazo, link do vídeo…" style="min-height:90px"></textarea></div>
       </div>`).join("");
   }
@@ -646,6 +670,7 @@ function iniciar() {
 }
 (async () => {
   if (MODO_DEMO) { document.getElementById("demo").hidden = false; iniciar(); return; }
+  if (SO_VER) { iniciar(); return; }
   if (await API.sessao()) { bSair.hidden = false; iniciar(); } else login.hidden = false;
 })();
 </script>
