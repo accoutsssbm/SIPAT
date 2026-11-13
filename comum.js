@@ -120,7 +120,7 @@ const norm = s => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const busca = (lista, termo) => {
   const t = norm(termo).split(/\s+/).filter(Boolean);
-  return t.length ? lista.filter(p => { const n = norm(p.nome); return t.every(x => n.includes(x)); }) : lista;
+  return t.length ? lista.filter(p => { const n = norm(p.nome + " " + (p.cargo || "")); return t.every(x => n.includes(x)); }) : lista;
 };
 const curto = nome => { const p = nome.split(" "); return p.length > 2 ? `${p[0]} ${p[p.length - 1]}` : nome; };
 
